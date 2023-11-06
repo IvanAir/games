@@ -1,0 +1,272 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+
+[System.Serializable]
+public struct Item
+{
+    public string name;
+    public Sprite sprite;
+    public int price;
+    public int bought;
+   // public Button preview;
+    public Button button;
+
+}
+public class Shop : MonoBehaviour
+{
+
+    public Item[] itemlist;
+
+    public Image middle;//не используются
+    public Image left;
+    public Image right;
+
+    [SerializeField] private Image SkinImage;
+    [SerializeField] private Text ItemName;
+    [SerializeField] private Text Price;
+
+    public int number = 0;
+    [SerializeField] private GameObject gg;
+    [SerializeField] private GameObject NoMoneyPanel;
+    [SerializeField] private Text TNoMoney;
+    [SerializeField] private Text Tbuy;
+    [SerializeField] private GameObject BuyPanel;
+    [SerializeField] private Text TDiamond;
+    //фон
+    [SerializeField] private Skybox skybox;
+    [SerializeField] private Material[] mat;
+    
+    private void Start()
+    {
+        skybox.material = mat[UnityEngine.Random.Range(0, mat.Length - 1)];
+        //ItemName.text = itemlist[number].name;
+        //left.sprite = itemlist[itemlist.Length - 1].sprite;
+        //middle.sprite = itemlist[number].sprite;
+        //right.sprite = itemlist[number + 1].sprite;
+        //уже куплено или нет
+        // IsBuy();
+        //BoughtCheck(0);
+        for (int i = 0; i < itemlist.Length; i++)
+        {
+
+         if (gg.GetComponent<SpriteRenderer>().sprite == itemlist[i].sprite)
+        {
+                BoughtCheck(i);
+                break;   
+        }
+            Debug.Log(i);
+        }
+        TDiamond.text = PlayerPrefs.GetInt("Diamond").ToString();
+    }
+    private void Update()
+    {
+        middle.rectTransform.Rotate(new Vector3(0, 0, -20 * Time.deltaTime));
+
+    }
+
+    public void Standart()
+    {
+        ActiveBP(0);
+    }
+    public void Bomb()
+    {
+        ActiveBP(1);
+    }
+    public void Coin()
+    {
+        ActiveBP(2);
+    }
+    public void Earth()
+    {
+        ActiveBP(3);
+    }
+    public void VinylRarity()
+    {
+        ActiveBP(4);
+    }
+    public void Clock()
+    {
+        ActiveBP(5);
+    }
+    public void Football()
+    {
+        ActiveBP(6);
+    }
+    public void Basketball()
+    {
+        ActiveBP(7);
+    }
+    public void Shield()
+    {
+        ActiveBP(8);
+    }
+    public void Donut()
+    {
+        ActiveBP(9);
+    }
+    public void Pizza()
+    {
+        ActiveBP(10);
+    }
+    public void Rainbow()
+    {
+        ActiveBP(11);
+    }
+    
+    public void BoughtCheck(int numb)
+    {
+        for (int i = 0; i < itemlist.Length - 1; i++)
+        {
+            if (PlayerPrefs.GetInt(i.ToString()) == 1)
+            {
+                itemlist[i].button.GetComponentInChildren<Button>().interactable = true;
+                itemlist[i].button.GetComponentInChildren<Text>().text = "Bought";
+            }
+        }
+ itemlist[numb].button.GetComponentInChildren<Button>().interactable = false;
+            itemlist[numb].button.GetComponentInChildren<Text>().text = "Select";
+    }
+    //[SerializeField] private TSkinImage;
+    public void ActiveBP(int numb)
+    {//уже куплено или нет
+        if (PlayerPrefs.GetInt(numb.ToString()) == 1)
+        {
+            //Tbuy.text = "Selected";
+            //            itemlist[numb].bbf.interactable = false;
+            BoughtCheck(numb);
+           
+            gg.GetComponent<SpriteRenderer>().sprite = itemlist[numb].sprite;
+
+        }
+        else
+        {
+           // Tbuy.text = "Buy";
+            BuyPanel.SetActive(true);
+            SkinImage.sprite = itemlist[numb].sprite;
+            ItemName.text = itemlist[numb].name;
+            Price.text = itemlist[numb].price.ToString();
+
+            number = numb;
+            //if (BuyPanel.activeSelf == false)
+            //{
+            //BuyPanel.SetActive(true);
+            //}
+            //else
+            //{
+            //    BuyPanel.SetActive(false);
+            //}
+        }
+    }
+    public void Buy()
+    {
+
+        if (PlayerPrefs.GetInt(number.ToString()) == 0 && PlayerPrefs.GetInt("Diamond") >= itemlist[number].price)//если ещё не куплено и денег хватает
+        {
+
+            PlayerPrefs.SetInt("Diamond", PlayerPrefs.GetInt("Diamond") - itemlist[number].price);
+            itemlist[number].bought = 1;
+            PlayerPrefs.SetInt(number.ToString(), itemlist[number].bought);
+            gg.GetComponent<SpriteRenderer>().sprite = itemlist[number].sprite;
+            BuyPanel.SetActive(false);
+            //Tbuy.text = "Selected";
+            BoughtCheck(number);
+           
+        }
+        else
+        {
+            NoMoneyPanel.SetActive(true);
+            TNoMoney.text = "Вам не хватает " + (itemlist[number].price - PlayerPrefs.GetInt("Diamond")) + " deneg";
+        }
+
+        TDiamond.text = PlayerPrefs.GetInt("Diamond").ToString();
+    }
+
+
+
+
+
+
+    public void Right()
+    {//переключение картинок вправо
+        number += 1;
+        if (number >= itemlist.Length)
+        {
+            number = 0;
+            left.sprite = itemlist[itemlist.Length - 1].sprite;
+        }
+        else
+        {
+            left.sprite = itemlist[number - 1].sprite;
+        }
+        middle.sprite = itemlist[number].sprite;
+        ItemName.text = itemlist[number].name;
+        Price.text = itemlist[number].price.ToString();
+        if (number == itemlist.Length - 1)
+        {
+            right.sprite = itemlist[0].sprite;
+        }
+        else
+        {
+            right.sprite = itemlist[number + 1].sprite;
+        }
+        //уже куплено или нет
+        IsBuy();
+    }
+    public void Left()
+    {//переключение картинок влево
+        number -= 1;
+        if (number < 0)
+        {
+            number = itemlist.Length - 1;
+            right.sprite = itemlist[0].sprite;
+        }
+        else
+        {
+            right.sprite = itemlist[number + 1].sprite;
+        }
+        middle.sprite = itemlist[number].sprite;
+        ItemName.text = itemlist[number].name;
+        Price.text = itemlist[number].price.ToString();
+        if (number == 0)
+        {
+            left.sprite = itemlist[itemlist.Length - 1].sprite;
+        }
+        else
+        {
+            left.sprite = itemlist[number - 1].sprite;
+        }
+        //уже куплено или нет
+        IsBuy();
+    }
+
+    public void IsBuy()
+    {
+        //уже куплено или нет
+        if (gg.GetComponent<SpriteRenderer>().sprite == itemlist[number].sprite)
+        {
+            Tbuy.text = "Selected";
+        }
+        else if (PlayerPrefs.GetInt(number.ToString()) == 1)
+        {
+            Tbuy.text = "Bought";
+
+        }
+        else
+        {
+            Tbuy.text = "Buy";
+        }
+    }
+
+
+
+    public void GoScene1()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+
+}

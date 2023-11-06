@@ -1,0 +1,288 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+[System.Serializable]
+public struct Ship
+{
+    public string name;
+    public Sprite sprite;
+    public string info;
+    public string upgradesinfo;
+    public int price;
+
+    public int bought;
+}
+
+[System.Serializable]
+public struct Gun
+{
+    public string name;
+    public Sprite sprite;
+    public string info;
+    public string firerate;
+    public string damage;
+    public int price;
+
+    public int bought;
+}
+
+public class Shop : MonoBehaviour
+{
+    public Ship[] itemlist;
+    public Gun[] gunlist;
+
+    //dengi
+    [SerializeField] private Text Money;
+    // кораблики    
+    [SerializeField] private Text ShipName;
+    [SerializeField] private Text ShipInfo;
+    [SerializeField] private Text ShipUpgrades;
+    [SerializeField] private Text ShipPrice;
+    [SerializeField] private Image ShipImage;
+    [SerializeField] private Toggle ShipTog;  //галочка выбора
+
+    private int ShipNumber = 0;
+    //оружие корабликов
+    [SerializeField] private Text GunName;
+    [SerializeField] private Text GunInfo;
+    [SerializeField] private Text GunFireRate;
+    [SerializeField] private Text GunDamage;
+    [SerializeField] private Text GunPrice;
+    [SerializeField] private Image GunImage;  //тут показывается кртинка выбранного предмета...
+    [SerializeField] private Toggle GunTog;  //галочка выбора
+    private int GunNumber = 0;
+
+    private int i = 0;
+    private void Awake()
+    {
+        GunNumber = PlayerPrefs.GetInt("KeyGun");
+        ShipNumber = PlayerPrefs.GetInt("KeyShip");
+
+        SelectShipINShop();
+        SelectGunINShop();
+    }
+    //магазин всего остального
+    public void SelectAbil0()
+    {//ракеты
+        PlayerPrefs.SetInt("Ability", 0);
+    }
+    public void SelectAbil1()
+    {//щит
+        PlayerPrefs.SetInt("Ability", 1);
+
+    }
+    public void SelectAbil2()
+    {//время
+        PlayerPrefs.SetInt("Ability", 2);
+
+    }
+    public void SelectAbil3()
+    {//хил
+        PlayerPrefs.SetInt("Ability", 3);
+
+    }
+
+    //кораблики
+    private void SelectShipINShop()
+    {
+        ShipName.text = itemlist[ShipNumber].name;
+        ShipInfo.text = itemlist[ShipNumber].info;
+        ShipUpgrades.text = itemlist[ShipNumber].upgradesinfo;
+        ShipTog.isOn = false;
+
+        if (PlayerPrefs.GetInt(ShipNumber.ToString()) == 1 && ShipNumber == PlayerPrefs.GetInt("KeyShip"))
+        {
+            ShipPrice.text = "Выбрано";
+            ShipTog.isOn = true;
+        }
+        else if (PlayerPrefs.GetInt(ShipNumber.ToString()) == 1)
+        {
+            ShipPrice.text = "Куплено";
+        }
+        else
+        {
+            ShipPrice.text = itemlist[ShipNumber].price.ToString();
+        }
+        ShipImage.sprite = itemlist[ShipNumber].sprite;
+        Money.text = PlayerPrefs.GetFloat("Money").ToString();
+
+    }
+    public void SwipeShipLeft()
+    {
+        ShipNumber -= 1;
+        if (ShipNumber < 0) ShipNumber = itemlist.Length - 1;  ///i = колво кораблей
+        //     IfElseShip();
+        SelectShipINShop();
+    }
+    public void SwipeShipRight()
+    {
+        ShipNumber += 1;
+        if (ShipNumber > itemlist.Length - 1) ShipNumber = 0;
+        // IfElseShip();
+        SelectShipINShop();
+    }
+    public void SelectShip()
+    {// выбор корабля или покупка
+
+        //  ShipInterect.interactable = false;
+        Debug.Log(ShipNumber + "  " + itemlist[ShipNumber].name);
+        if (PlayerPrefs.GetInt(ShipNumber.ToString()) == 0 && PlayerPrefs.GetFloat("Money") >= itemlist[ShipNumber].price)//если ещё не куплено и денег хватает
+        {
+            PlayerPrefs.SetFloat("Money", PlayerPrefs.GetFloat("Money") - itemlist[ShipNumber].price);
+            itemlist[ShipNumber].bought = 1;
+            PlayerPrefs.SetInt(ShipNumber.ToString(), itemlist[ShipNumber].bought);
+            //выбор персонажа
+            PlayerPrefs.SetInt("KeyShip", ShipNumber);
+            //    music.AudioSource.PlayOneShot(music.BuyFx);
+            ShipPrice.text = "Выбрано";
+            ShipTog.isOn = true;
+
+        }
+        else if (PlayerPrefs.GetInt(ShipNumber.ToString()) == 1)
+        {
+            PlayerPrefs.SetInt("KeyShip", ShipNumber);
+            ShipPrice.text = "Выбрано";
+            ShipTog.isOn = true;
+
+        }
+        else
+        {
+            // NoMoneyPanel.SetActive(true);
+            //TNoMoney.text = "Вам не хватает " + (itemlist[number].price - PlayerPrefs.GetInt("Diamond")) + " deneg";
+        }
+        Money.text = PlayerPrefs.GetFloat("Money").ToString();
+
+    }
+
+    //скины корабликов
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //оружие
+    private void SelectGunINShop()
+    {
+        GunName.text = gunlist[GunNumber].name;
+        GunInfo.text = gunlist[GunNumber].info;
+        GunFireRate.text = gunlist[GunNumber].firerate;
+        GunDamage.text = gunlist[GunNumber].damage;
+         
+        GunTog.isOn = false;
+        if (PlayerPrefs.GetInt(GunNumber.ToString() + 50) == 1 && GunNumber == PlayerPrefs.GetInt("KeyGun"))
+        {
+            GunPrice.text = "Выбрано";
+            GunTog.isOn = true;
+        }
+        else if (PlayerPrefs.GetInt(GunNumber.ToString() + 50) == 1)
+        {
+            GunPrice.text = "Куплено";
+        }
+        else
+        {
+            GunPrice.text = gunlist[GunNumber].price.ToString();
+        }
+
+        GunImage.sprite = gunlist[GunNumber].sprite;
+        Money.text = PlayerPrefs.GetFloat("Money").ToString();
+    }
+    public void SwipeGunLeft()
+    {
+        GunNumber -= 1;
+        if (GunNumber < 0) GunNumber = gunlist.Length - 1;  ///GunNumber = колво кораблей
+        SelectGunINShop();
+    }
+    public void SwipeGunRight()
+    {
+        GunNumber += 1;
+        if (GunNumber > gunlist.Length - 1) GunNumber = 0;
+        SelectGunINShop();
+    }
+    public void SelectGun()
+    {
+
+        //  ShipInterect.interactable = false;
+        Debug.Log(GunNumber + "  " + gunlist[GunNumber].name);
+        if (PlayerPrefs.GetInt(GunNumber.ToString() + 50) == 0 && PlayerPrefs.GetFloat("Money") >= gunlist[GunNumber].price)//если ещё не куплено и денег хватает
+        {
+            PlayerPrefs.SetFloat("Money", PlayerPrefs.GetFloat("Money") - gunlist[GunNumber].price);
+            gunlist[GunNumber].bought = 1;
+            PlayerPrefs.SetInt(GunNumber.ToString() + 50, gunlist[GunNumber].bought);
+            //выбор персонажа
+            PlayerPrefs.SetInt("KeyGun", GunNumber);
+            //    BuyPanel.SetActive(false);
+            //    music.AudioSource.PlayOneShot(music.BuyFx);
+            GunPrice.text = "Выбрано";
+            GunTog.isOn = true;
+
+        }
+        else if (PlayerPrefs.GetInt(GunNumber.ToString() + 50) == 1)
+        {
+            PlayerPrefs.SetInt("KeyGun", GunNumber);
+            GunPrice.text = "Выбрано";
+            GunTog.isOn = true;
+        }
+        else
+        {
+
+            // NoMoneyPanel.SetActive(true);
+            //TNoMoney.text = "Вам не хватает " + (itemlist[number].price - PlayerPrefs.GetInt("Diamond")) + " deneg";
+        }
+        Money.text = PlayerPrefs.GetFloat("Money").ToString();
+
+    }
+
+
+
+
+
+
+
+
+
+
+    // навигация
+    public void GoToScene1()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    [SerializeField] private GameObject[] MenuTab;
+    //Выбор вкладки
+    public void MenuGun()
+    {
+        for (int j = 0; j < MenuTab.Length; j++) MenuTab[j].SetActive(false);
+        MenuTab[0].SetActive(true);
+    }
+    public void MenuShip()
+    {
+        for (int j = 0; j < MenuTab.Length; j++) MenuTab[j].SetActive(false);
+        MenuTab[1].SetActive(true);
+    }
+    public void MenuDonate()
+    {
+        for (int j = 0; j < MenuTab.Length; j++) MenuTab[j].SetActive(false);
+        MenuTab[2].SetActive(true);
+    }
+
+
+}
